@@ -1,20 +1,30 @@
-const { model, Schema } = require("mongoose");
+const { model, Schema } = require('mongoose');
+const bcrypt = require('bcrypt');
 
 const userSchema = new Schema(
   {
     name: { type: String, required: true },
-    email: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     pic: {
       type: String,
-      required: true,
       default:
-        "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg",
+        'https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg',
     },
   },
   { timestamps: true }
 );
 
-const User = model("User", userSchema);
+userSchema.pre('save', async function (next) {
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
+});
+
+userSchema.methods.matchPassword = async function (pwd, pwdDb) {
+  return await bcrypt.compare(pwd, pwdDb);
+};
+
+const User = model('User', userSchema);
 
 module.exports = User;
