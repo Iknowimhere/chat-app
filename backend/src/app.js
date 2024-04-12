@@ -9,16 +9,16 @@ require('./config/db');
 let app = express();
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     origin: 'http://localhost:5173',
   })
 );
 
-
 app.use('/api/v1/users', userRoutes);
 
-app.use(notFound)
+app.use(notFound);
 app.use(errorHandler);
 
 module.exports = app;
